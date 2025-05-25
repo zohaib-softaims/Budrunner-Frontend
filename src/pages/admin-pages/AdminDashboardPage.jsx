@@ -1,5 +1,6 @@
-import { StatCard } from "../../components/admin-components/admin-shared-components/StatCard";
-export const AdminDashboard = () => {
+import { StatCard } from "../../components/shared/StatCard";
+
+const AdminDashboardPage = () => {
   return (
     <div className="ml-72 min-h-screen bg-gray-50 p-8">
       <h1 className="text-3xl font-bold text-gray-900 mb-8">Home</h1>
@@ -34,3 +35,5 @@ export const AdminDashboard = () => {
     </div>
   );
 };
+
+export default AdminDashboardPage;

@@ -1,15 +1,15 @@
 import { Routes, Route } from "react-router-dom";
-import { Sidebar } from "../components/admin-components/admin-shared-components/Sidebar";
-import { AdminDashboard } from "../pages/admin-pages/AdminDashboard";
-import { AdminOrders } from "../pages/admin-pages/AdminOrders";
-import { AdminMerchants } from "../pages/admin-pages/AdminMerchants";
+import AdminSidebar from "../components/admin-components/admin-shared-components/AdminSidebar";
+import AdminDashboardPage from "../pages/admin-pages/AdminDashboardPage";
+import AdminOrdersPage from "../pages/admin-pages/AdminOrdersPage";
+import AdminMerchantsPage from "../pages/admin-pages/AdminMerchantsPage";
 const AdminRoutes = () => (
   <>
-    <Sidebar />
+    <AdminSidebar />
     <Routes>
-      <Route path="/dashboard" element={<AdminDashboard />} />
-      <Route path="/orders" element={<AdminOrders />} />
-      <Route path="/merchants" element={<AdminMerchants />} />
+      <Route path="/dashboard" element={<AdminDashboardPage />} />
+      <Route path="/orders" element={<AdminOrdersPage />} />
+      <Route path="/merchants" element={<AdminMerchantsPage />} />
     </Routes>
   </>
 );

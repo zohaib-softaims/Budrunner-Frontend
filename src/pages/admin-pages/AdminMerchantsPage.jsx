@@ -1,6 +1,6 @@
 import { Plus, ImageIcon } from "lucide-react";
 
-export const AdminMerchants = () => {
+const AdminMerchantsPage = () => {
   const merchants = [
     { id: 1, name: "Smokeshop 1" },
     { id: 2, name: "Smokeshop 2" },
@@ -41,3 +41,5 @@ export const AdminMerchants = () => {
     </div>
   );
 };
+
+export default AdminMerchantsPage;

@@ -1,6 +1,7 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { adminOrdersData } from "../../contants/admin-data/adminOrdersData";
-export const AdminOrders = () => {
+import { adminOrdersData } from "../../contants/adminData";
+
+const AdminOrdersPage = () => {
   return (
     <div className="ml-72 min-h-screen bg-gray-50 p-8">
       <div className="mb-8">
@@ -107,3 +108,5 @@ export const AdminOrders = () => {
     </div>
   );
 };
+
+export default AdminOrdersPage;

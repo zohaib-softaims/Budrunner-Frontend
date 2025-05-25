@@ -1,7 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { Home, Package, Store, Users, Settings, ChevronDown } from "lucide-react";
 
-export const Sidebar = () => {
+const AdminSidebar = () => {
   const location = useLocation();
 
   const menuItems = [
@@ -67,3 +67,5 @@ export const Sidebar = () => {
     </div>
   );
 };
+
+export default AdminSidebar;
