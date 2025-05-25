@@ -3,8 +3,10 @@ import { X, Plus, Trash2 } from "lucide-react";
 
 export const AddItemModal = ({ categoryId, modifiers, onClose, onSave }) => {
   const [name, setName] = useState("");
-  const [price, setPrice] = useState("");
+  const [pickupPrice, setPickupPrice] = useState("");
+  const [deliveryPrice, setDeliveryPrice] = useState("");
   const [usesModifierPricing, setUsesModifierPricing] = useState(false);
+  const [selectedModifier, setSelectedModifier] = useState("");
   const [options, setOptions] = useState([]);
 
   const addOption = () => {
@@ -16,7 +18,7 @@ export const AddItemModal = ({ categoryId, modifiers, onClose, onSave }) => {
     if (field === "name") {
       newOptions[index].name = value;
     } else {
-      newOptions[index].price = value;
+      newOptions[index].price = parseFloat(value) || 0;
     }
     setOptions(newOptions);
   };
@@ -25,130 +27,196 @@ export const AddItemModal = ({ categoryId, modifiers, onClose, onSave }) => {
     setOptions(options.filter((_, i) => i !== index));
   };
 
+  const handleModifierChange = (modifierId) => {
+    setSelectedModifier(modifierId);
+    const modifier = modifiers.find((m) => m.id === modifierId);
+    if (modifier) {
+      setOptions(
+        modifier.options.map((opt) => ({
+          id: opt.id,
+          name: opt.name,
+          price: 0,
+        }))
+      );
+    }
+  };
+
   const handleSave = () => {
-    if (name.trim() && (usesModifierPricing || price.trim())) {
-      const priceValue = Number.parseFloat(price) || 0;
+    if (name.trim() && (usesModifierPricing ? selectedModifier : (pickupPrice.trim() && deliveryPrice.trim()))) {
       const item = {
         name: name.trim(),
-        pickupPrice: priceValue,
-        deliveryPrice: priceValue,
+        pickupPrice: usesModifierPricing ? 0 : parseFloat(pickupPrice) || 0,
+        deliveryPrice: usesModifierPricing ? 0 : parseFloat(deliveryPrice) || 0,
         usesModifierPricing,
-        options: options.filter((opt) => opt.name.trim()),
+        selectedModifier: usesModifierPricing ? selectedModifier : null,
+        options: usesModifierPricing ? options.filter((opt) => opt.name.trim()) : [],
       };
       onSave(categoryId, item);
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg w-96 max-h-[80vh] overflow-y-auto">
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+      <div className="bg-white rounded-xl w-[480px] max-h-[85vh] overflow-y-auto shadow-xl">
+        <div className="flex items-center justify-between p-6 border-b border-gray-100">
           <div>
-            <h2 className="text-lg font-semibold text-gray-900">Item</h2>
-            <p className="text-sm text-gray-600">Add New Item</p>
+            <h2 className="text-xl font-semibold text-gray-900">Add Item</h2>
+            <p className="text-sm text-gray-500 mt-1">Create a new item for your menu</p>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+          <button 
+            onClick={onClose} 
+            className="text-gray-400 hover:text-gray-600 transition-colors p-1 hover:bg-gray-100 rounded-full"
+          >
             <X size={20} />
           </button>
         </div>
 
-        <div className="p-6">
-          <div className="mb-4">
+        <div className="p-6 space-y-6">
+          <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Name <span className="text-red-500">Required</span>
+              Item Name <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Item name"
+              className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+              placeholder="Enter item name"
             />
           </div>
 
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Price <span className="text-red-500">Required</span>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              Pricing Type <span className="text-red-500">*</span>
             </label>
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center">
+            <div className="flex items-center space-x-6">
+              <label className="flex items-center">
                 <input
                   type="radio"
-                  id="fixed-price"
                   checked={!usesModifierPricing}
                   onChange={() => setUsesModifierPricing(false)}
-                  className="mr-2"
+                  className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                 />
-                <label htmlFor="fixed-price" className="text-sm">
-                  $ price
-                </label>
-              </div>
-              <span className="text-gray-400">or</span>
-              <div className="flex items-center">
+                <span className="ml-2 text-sm text-gray-700">Fixed Price</span>
+              </label>
+              <label className="flex items-center">
                 <input
                   type="radio"
-                  id="modifier-price"
                   checked={usesModifierPricing}
                   onChange={() => setUsesModifierPricing(true)}
-                  className="mr-2"
+                  className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                 />
-                <label htmlFor="modifier-price" className="text-sm">
-                  modifier pricing
-                </label>
-              </div>
+                <span className="ml-2 text-sm text-gray-700">Modifier Pricing</span>
+              </label>
             </div>
-            {!usesModifierPricing && (
-              <input
-                type="number"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                className="mt-2 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="0.00"
-                step="0.01"
-              />
-            )}
           </div>
 
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Options</label>
-            <div className="space-y-3">
-              {options.map((option, index) => (
-                <div key={option.id} className="flex items-center space-x-2">
-                  <input
-                    type="text"
-                    value={option.name}
-                    onChange={(e) => updateOption(index, "name", e.target.value)}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Option name"
-                  />
+          {!usesModifierPricing ? (
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Pickup Price <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
                   <input
                     type="number"
-                    value={option.price || ""}
-                    onChange={(e) => updateOption(index, "price", Number.parseFloat(e.target.value) || 0)}
-                    className="w-20 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="$ price"
+                    value={pickupPrice}
+                    onChange={(e) => setPickupPrice(e.target.value)}
+                    className="w-full pl-7 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                    placeholder="0.00"
                     step="0.01"
+                    min="0"
                   />
-                  <button onClick={() => removeOption(index)} className="text-red-500 hover:text-red-700">
-                    <Trash2 size={16} />
-                  </button>
                 </div>
-              ))}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Delivery Price <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                  <input
+                    type="number"
+                    value={deliveryPrice}
+                    onChange={(e) => setDeliveryPrice(e.target.value)}
+                    className="w-full pl-7 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                    placeholder="0.00"
+                    step="0.01"
+                    min="0"
+                  />
+                </div>
+              </div>
             </div>
-            <button onClick={addOption} className="mt-3 text-blue-600 text-sm font-medium hover:text-blue-700 flex items-center space-x-1">
-              <Plus size={16} />
-              <span>ADD A OPTION</span>
-            </button>
-          </div>
+          ) : (
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Select Modifier <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={selectedModifier}
+                  onChange={(e) => handleModifierChange(e.target.value)}
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                >
+                  <option value="">Select a modifier</option>
+                  {modifiers.map((modifier) => (
+                    <option key={modifier.id} value={modifier.id}>
+                      {modifier.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {selectedModifier && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                    Set Prices for Options
+                  </label>
+                  <div className="space-y-3">
+                    {options.map((option, index) => (
+                      <div key={option.id} className="flex items-center space-x-2">
+                        <span className="flex-1 px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700">
+                          {option.name}
+                        </span>
+                        <div className="relative w-32">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                          <input
+                            type="number"
+                            value={option.price || ""}
+                            onChange={(e) => updateOption(index, "price", e.target.value)}
+                            className="w-full pl-7 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                            placeholder="0.00"
+                            step="0.01"
+                            min="0"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
-        <div className="flex justify-end p-6 border-t border-gray-200">
+        <div className="flex justify-end gap-3 p-6 border-t border-gray-100">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            Cancel
+          </button>
           <button
             onClick={handleSave}
-            disabled={!name.trim() || (!usesModifierPricing && !price.trim())}
-            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+            disabled={
+              !name.trim() ||
+              (!usesModifierPricing && (!pickupPrice.trim() || !deliveryPrice.trim())) ||
+              (usesModifierPricing && !selectedModifier)
+            }
+            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
           >
-            SAVE
+            Save Item
           </button>
         </div>
       </div>
